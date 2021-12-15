@@ -22,11 +22,11 @@ function Help()
 for arg in "$@"; do
   shift
   case "$arg" in
-    "--help")  set -- "$@" "-h" ;;
+    "--help")   set -- "$@" "-h" ;;
     "--ref")    set -- "$@" "-r" ;;
-    "--db")   set -- "$@" "-d" ;;
-    "--dir")   set -- "$@" "-i" ;;
-    *)         set -- "$@" "$arg"
+    "--db")     set -- "$@" "-d" ;;
+    "--dir")    set -- "$@" "-i" ;;
+    *)          set -- "$@" "$arg"
   esac
 done
 
