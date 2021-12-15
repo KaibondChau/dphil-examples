@@ -6,7 +6,7 @@ function Help()
    # Display Help
    echo "Ampliseq amplicon mapper v1"
    echo 
-   echo "Syntax: scriptTemplate [-f|r|h]"
+   echo "Syntax: scriptTemplate [-f|r|o|h]"
    echo "options:"
    echo "f     Forward read.fq.gz"
    echo "r     Reverse read.fq.gz"
