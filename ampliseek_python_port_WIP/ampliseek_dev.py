@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from os import close, name
 import sys
 import argparse
 import gzip
