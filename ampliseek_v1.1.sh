@@ -83,7 +83,7 @@ then
     echo "Complete"
     echo "All finished" # timer to add total run time
 else
-    # Same as above but no stderr direction
+    # Same as above but no stderr direction - # Todo abstract command into a separate function (duplication of code hinders maintainability) 
     reformat.sh in1=$read1 in2=$read2 out=interleaved.fq.gz 
     bbduk2.sh in=interleaved.fq.gz out=trimmed.fq.gz mink=6 ktrim=r k=19 hdist=1 edist=0 ref=adapters.fa minlength=75 qin=33 
     bbmerge-auto.sh in=trimmed.fq.gz out=merged.fq k=62 extend2=50 ecct 
