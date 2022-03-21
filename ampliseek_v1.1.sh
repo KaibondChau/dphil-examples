@@ -87,6 +87,6 @@ else
     reformat.sh in1=$read1 in2=$read2 out=interleaved.fq.gz 
     bbduk2.sh in=interleaved.fq.gz out=trimmed.fq.gz mink=6 ktrim=r k=19 hdist=1 edist=0 ref=adapters.fa minlength=75 qin=33 
     bbmerge-auto.sh in=trimmed.fq.gz out=merged.fq k=62 extend2=50 ecct 
-    bbmapskimmer.sh in=merged.fq outm=mapped.sam ref=ampliseq_targets_only.fasta ambig=all saa=f sam=1.3 semiperfectmode=t int=f
+    bbmapskimmer.sh in=merged.fq outm=mapped.sam ref=ampliseq_targets_only.fasta ambig=all minscaf=73 saa=f sam=1.3 semiperfectmode=t int=f
     pileup.sh in=mapped.sam out=$output
 fi
