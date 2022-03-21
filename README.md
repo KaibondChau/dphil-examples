@@ -1,4 +1,4 @@
-# dphil-examples
+# dphil-misc
 
 ## Ampliseek (working name)
 
