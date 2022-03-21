@@ -135,6 +135,7 @@ def map_reads(filename):
         "out=stdout.sam",
         "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
         "ambig=all",
+        "minscaf=73",
         "saa=f",
         "sam=1.3",
         "semiperfectmode=t",
