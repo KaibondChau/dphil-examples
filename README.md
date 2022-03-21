@@ -11,7 +11,7 @@ Python port (in progress): ampliseek_python_port_WIP/ampliseek_dev.py
 
 ## Copy number estimation
 
-Shell script to generate searchable BAM used for estimating mean depth at positions of interest
+Shell script to generate searchable BAM for estimating mean depth at positions of interest
 
 Shell script: copy_no_estimation_kc_v1.1.sh
 
