@@ -75,7 +75,7 @@ then
     echo "Complete"
     echo "Mapping merged reads..."
     # Map merged reads against reference
-    bbmapskimmer.sh in=merged.fq outm=mapped.sam ref=ampliseq_targets_only.fasta ambig=all saa=f sam=1.3 semiperfectmode=t int=f 1>bbmapskimmer.txt 2>&1
+    bbmapskimmer.sh in=merged.fq outm=mapped.sam ref=ampliseq_targets_only.fasta ambig=all minscaf=73 saa=f sam=1.3 semiperfectmode=t int=f 1>bbmapskimmer.txt 2>&1
     echo "Complete"
     echo "Writing output..."
     # Pileup coverage
