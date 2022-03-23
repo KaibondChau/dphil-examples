@@ -56,8 +56,7 @@ def interleave_reads(args, filename):
         "reformat.sh",
         str("in1=" + args.forward_reads),
         str("in2=" + args.reverse_reads),
-        "out=stdout.fa"]
-    print(str(filename + '_interleaved.fa')) 
+        str("out=" + filename + '_interleaved.fq.gz')]
     p = subprocess.Popen(
         reformat_command,
         stdout=subprocess.PIPE,
@@ -68,18 +67,18 @@ def interleave_reads(args, filename):
     e = open(str(filename + '_interleave_stderr'), 'w')  # create output stderr file  
     e.write(err)  
     e.close()  
-    out = out.decode() # decode
-    o = open(str(filename + '_interleaved.fa'), 'w')  # create output stdout file 
-    o.write(out)  
-    o.close()  
+    #out = out.decode() # decode
+    #o = open(str(filename + '_interleaved.fa'), 'w')  # create output stdout file 
+    #o.write(out)  
+    #o.close()  
 
 
 # Trims interleaved reads using bbduk2.sh and standard Illumina adapters
 def trim_reads(filename):
     bbduk_command= [
         "bbduk2.sh",
-        str("in="+ str(filename + '_interleaved.fa')),
-        "out=stdout.fa",
+        str("in="+ str(filename + '_interleaved.fq.gz')),
+        str("out="+ filename + '_trimmmed.fq.gz'),
         "mink=6",
         "ktrim=r",
         "k=19",
@@ -97,18 +96,18 @@ def trim_reads(filename):
     e = open(str(filename + '_trim_stderr'), 'w')  # create output stderr file 
     e.write(err)  
     e.close()  
-    out = out.decode() # decode
-    o = open(str(filename + '_trimmmed.fa'), 'w')  # create output stdout file 
-    o.write(out)  
-    o.close()  
+    #out = out.decode() # decode
+    #o = open(str(filename + '_trimmmed.fa'), 'w')  # create output stdout file 
+    #o.write(out)  
+    #o.close()  
 
 
 # Merge trimmed reads using bbmerge-auto.sh 
 def merge_reads(filename):
     bbmerge_command= [
         "bbmerge-auto.sh",
-        str("in="+ str(filename + '_trimmmed.fa')),
-        "out=stdout.fa",
+        str("in="+ str(filename + '_trimmmed.fq.gz')),
+        str("out="+ filename + '_merged.fq.gz'),
         "k=62",
         "extend2=50",
         "ecct"]
@@ -121,17 +120,17 @@ def merge_reads(filename):
     e = open(str(filename + '_merge_stderr'), 'w')  # create output stderr file 
     e.write(err)  
     e.close()  
-    out = out.decode() # decode
-    o = open(str(filename + '_merged.fa'), 'w')  # create output stdout file 
-    o.write(out)  
-    o.close()  
+    #out = out.decode() # decode
+    #o = open(str(filename + '_merged.fa'), 'w')  # create output stdout file 
+    #o.write(out)  
+    #o.close()  
 
 
 # Map merged reads against Ampliseq AMR panel targets using bbmapskimmer.sh semiperfect mode
 def map_reads(filename):
     bbmap_command= [
         "bbmapskimmer.sh",
-        str("in="+ str(filename + '_merged.fa')),
+        str("in="+ str(filename + '_merged.fq.gz')),
         "out=stdout.sam",
         "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
         "ambig=all",
@@ -194,6 +193,6 @@ def main_function():
     print("Pileup")
     pileup_reads(filename)
     end = time.time()
-    print(str("All done in " + str({round(end - start, 2)})[0] + "seconds"))
-
+    print(str("All done in " + str((round(end - start, 2))) + " seconds"))
+    
 main_function()
