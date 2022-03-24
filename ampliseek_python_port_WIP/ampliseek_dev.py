@@ -57,21 +57,15 @@ def interleave_reads(args, filename):
         str("in1=" + args.forward_reads),
         str("in2=" + args.reverse_reads),
         str("out=" + filename + '_interleaved.fq.gz')]
-    p = subprocess.Popen(
+    p_interleave = subprocess.run(
         reformat_command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p.communicate()  # read std
-    #todo write below into function for all (decode,open,write,close) also appears in trim_reads, merge_reads, map_reads, pileup_reads - reduce duplication
-    err = err.decode() # decode
+        stdout=subprocess.DEVNULL, # supress stdout
+        stderr=subprocess.PIPE, # capture stderr
+        universal_newlines=True) # capture as str not bytes (supersedes decode)
     e = open(str(filename + '_interleave_stderr'), 'w')  # create output stderr file  
-    e.write(err)  
-    e.close()  
-    #out = out.decode() # decode
-    #o = open(str(filename + '_interleaved.fa'), 'w')  # create output stdout file 
-    #o.write(out)  
-    #o.close()  
-
+    e.write(p_interleave.stderr)
+    e.close()
+    
 
 # Trims interleaved reads using bbduk2.sh and standard Illumina adapters
 def trim_reads(filename):
@@ -87,19 +81,14 @@ def trim_reads(filename):
         "ref=adapters.fa", # standard illumina adapters from BBTools #todo consider param
         "minlength=75",
         "qin=33"]
-    p_bbduk = subprocess.Popen(
+    p_bbduk = subprocess.run(
         bbduk_command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p_bbduk.communicate()  # read std
-    err = err.decode()
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        universal_newlines=True)
     e = open(str(filename + '_trim_stderr'), 'w')  # create output stderr file 
-    e.write(err)  
+    e.write(p_bbduk.stderr)  
     e.close()  
-    #out = out.decode() # decode
-    #o = open(str(filename + '_trimmmed.fa'), 'w')  # create output stdout file 
-    #o.write(out)  
-    #o.close()  
 
 
 # Merge trimmed reads using bbmerge-auto.sh 
@@ -111,19 +100,14 @@ def merge_reads(filename):
         "k=62",
         "extend2=50",
         "ecct"]
-    p_bbmerge = subprocess.Popen(
+    p_bbmerge = subprocess.run(
         bbmerge_command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p_bbmerge.communicate()  # read std
-    err = err.decode()
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        universal_newlines=True)
     e = open(str(filename + '_merge_stderr'), 'w')  # create output stderr file 
-    e.write(err)  
+    e.write(p_bbmerge.stderr)  
     e.close()  
-    #out = out.decode() # decode
-    #o = open(str(filename + '_merged.fa'), 'w')  # create output stdout file 
-    #o.write(out)  
-    #o.close()  
 
 
 # Map merged reads against Ampliseq AMR panel targets using bbmapskimmer.sh semiperfect mode
@@ -139,19 +123,17 @@ def map_reads(filename):
         "sam=1.3",
         "semiperfectmode=t",
         "int=f"]
-    p_bbmap = subprocess.Popen(
+    p_bbmap = subprocess.run(
         bbmap_command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p_bbmap.communicate()  # read std
-    err = err.decode()
+        stderr=subprocess.PIPE,
+        universal_newlines=True)
     e = open(str(filename + '_mapping_stderr'), 'w')  # create output stderr file 
-    e.write(err)  
+    e.write(p_bbmap.stderr)  
     e.close()  
-    out = out.decode() # decode
     o = open(str(filename + '_mapped.sam'), 'w')  # create output stdout file 
-    o.write(out)  
-    o.close()  
+    o.write(p_bbmap.stdout)  
+    o.close() 
 
 # Output coverage using pileup.sh
 def pileup_reads(filename):
@@ -159,18 +141,16 @@ def pileup_reads(filename):
         "pileup.sh",
         str("in="+ str(filename + '_mapped.sam')),
         "out=stdout"]
-    p_pileup = subprocess.Popen(
+    p_pileup = subprocess.run(
         pileup_command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p_pileup.communicate()  # read std
-    err = err.decode()
+        stderr=subprocess.PIPE,
+        universal_newlines=True)
     e = open(str(filename + '_pileup_stderr'), 'w')  # create output stderr file 
-    e.write(err)  
+    e.write(p_pileup.stderr)  
     e.close()  
-    out = out.decode() # decode
     o = open(str(filename + '_coverage.txt'), 'w')  # create output stdout file 
-    o.write(out)  
+    o.write(p_pileup.stdout)  
     o.close()  
 
 def main_function():
