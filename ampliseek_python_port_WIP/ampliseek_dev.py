@@ -10,6 +10,12 @@ import os
 from Bio import SeqIO
 
 
+# Define custom argument type for bbmapskimmer ID filter
+def percentFloat(id_arg):
+    value = float(id_arg)
+    if value < 0 or value > 1:
+        raise argparse.ArgumentTypeError('ID filter has to be between 0 and 1')
+    return value
 
 # Arguments
 def get_args():
@@ -17,6 +23,7 @@ def get_args():
         description="Ampliseek dev",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguements')
 
     # input forward fastq.gz file
     required.add_argument('-f', '--forward_reads', action='store',
@@ -27,6 +34,12 @@ def get_args():
     required.add_argument('-r', '--reverse_reads', action='store',
                           required=True,
                           help='Reverse fastq.gz file')
+
+    # input optional bbmapper id filter
+    optional.add_argument('-id', '--id_filter', action='store',
+                          required=False,
+                          type=percentFloat,
+                          help='bbmapskimmer ID filter [0-1]')
     
     args = parser.parse_args(None if sys.argv[1:] else ['-h'])
     return args
@@ -127,20 +140,32 @@ def merge_reads(filename, log_dir, output_dir):
     e.close()  
 
 
-# Map merged reads against Ampliseq AMR panel targets using bbmapskimmer.sh semiperfect mode
-def map_reads(filename, log_dir, output_dir):
-    bbmap_command= [
+# Map merged reads against Ampliseq AMR panel targets using bbmapskimmer.sh 
+def map_reads(args, filename, log_dir, output_dir):
+    if args.id_filter is not None:
+        bbmap_command= [ # manual id filter command
         "bbmapskimmer.sh",
         str("in="+ str(output_dir + filename + '_merged.fq.gz')),
         "out=stdout.sam",
         "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
         "ambig=all",
-        "minid=0.80", # added options for relaxed mapping (minid needs to be set as 1 below idfilter)
-        "idfilter=0.98", # arg here for 0.9 or 0.98
+        str("minid=" + str(args.id_filter-0.1)), # user-defined threshold - 0.1 (fast approximate filter)
+        str("idfilter=" + str(args.id_filter)), # user-defined threshold [0-1] (slow absolute filter)
         "minscaf=73",
         "saa=f",
         "sam=1.3",
-        #"semiperfectmode=t", # comment out for relaxed mapping
+        "int=f"]
+    else:
+        bbmap_command= [ # default semiperfect mode command
+        "bbmapskimmer.sh",
+        str("in="+ str(output_dir + filename + '_merged.fq.gz')),
+        "out=stdout.sam",
+        "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
+        "ambig=all",
+        "minscaf=73",
+        "saa=f",
+        "sam=1.3",
+        "semiperfectmode=t", 
         "int=f"]
     p_bbmap = subprocess.run(
         bbmap_command,
@@ -189,7 +214,7 @@ def main_function():
     merge_reads(filename, log_dir, output_dir)
     print("Completed")
     print("Mapping reads...")
-    map_reads(filename, log_dir, output_dir)
+    map_reads(args, filename, log_dir, output_dir)
     print("Completed")
     print("Pileup")
     pileup_reads(filename, log_dir, output_dir, cov_dir)
