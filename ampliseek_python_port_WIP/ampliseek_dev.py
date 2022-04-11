@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import sys
 import argparse
 import gzip
@@ -17,7 +16,7 @@ def percentFloat(id_arg):
         raise argparse.ArgumentTypeError('ID filter has to be between 0 and 1')
     return value
 
-# Arguments
+# Arguments - todo consider optional argument for specifying logs/intermediate files
 def get_args():
     parser = argparse.ArgumentParser(
         description="Ampliseek dev",
@@ -56,15 +55,14 @@ def validate_input(args):
         assert len(fasta_content) >= 1, 'No records found in reverse fq.gz file'
 
 
-# todo wrap below 2 chunks into if intermediate and logs wanted
-
-# get filename for writing files - currently relies on standard output from Illumina name_<read#>.fq.gz/.fastq.gz # todo could add as argument instead
+# get filename for writing files - currently relies on standard output from Illumina name_<read#>.fq.gz/.fastq.gz 
 def get_filename(args): 
     name = args.forward_reads.split('_1')
     filename = (name[0].split('/'))[-1]
     return(filename)
 
-# get directories to write optional intermediate outputs and logs    
+
+# get directories to write intermediate outputs and logs    
 def get_dirs(filename):
     log_dir = str(os.getcwd() + "/ampliseek_work/" + filename +"/logs/")
     output_dir = str(os.getcwd() + "/ampliseek_work/" + filename +"/outputs/")
@@ -78,8 +76,6 @@ def prep_dirs(filename):
     os.makedirs(str(os.getcwd() + "/ampliseek_work/" + filename +"/outputs"))
     
 
-# todo consider bash.sh commands as params to input into universal function
-
 # Interleaves forward and reverse reads using reformat.sh
 def interleave_reads(args, filename, log_dir, output_dir):
     reformat_command = [
@@ -89,7 +85,7 @@ def interleave_reads(args, filename, log_dir, output_dir):
         str("out=" + output_dir + filename + '_interleaved.fq.gz')]
     p_interleave = subprocess.run(
         reformat_command,
-        stdout=subprocess.DEVNULL, # supress stdout
+        stdout=subprocess.DEVNULL, # suppress stdout
         stderr=subprocess.PIPE, # capture stderr
         universal_newlines=True) # capture as str not bytes (supersedes decode)
     e = open(str(log_dir + filename + '_interleave_stderr'), 'w')  # create output stderr file  
@@ -108,7 +104,7 @@ def trim_reads(filename, log_dir, output_dir):
         "k=19",
         "hdist=1",
         "edist=0",
-        "ref=adapters.fa", # standard illumina adapters from BBTools #todo consider param
+        "ref=adapters.fa", # standard illumina adapters from BBTools 
         "minlength=75",
         "qin=33"]
     p_bbduk = subprocess.run(
@@ -143,11 +139,11 @@ def merge_reads(filename, log_dir, output_dir):
 # Map merged reads against Ampliseq AMR panel targets using bbmapskimmer.sh 
 def map_reads(args, filename, log_dir, output_dir):
     if args.id_filter is not None:
-        bbmap_command= [ # manual id filter command
+        bbmap_command= [ # manual id filter command when id_filter specified
         "bbmapskimmer.sh",
         str("in="+ str(output_dir + filename + '_merged.fq.gz')),
         "out=stdout.sam",
-        "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
+        "ref=ampliseq_targets_only.fasta", # AmpliSeq AMR panel targets from manifest 
         "ambig=all",
         str("minid=" + str(args.id_filter-0.1)), # user-defined threshold - 0.1 (fast approximate filter)
         str("idfilter=" + str(args.id_filter)), # user-defined threshold [0-1] (slow absolute filter)
@@ -160,7 +156,7 @@ def map_reads(args, filename, log_dir, output_dir):
         "bbmapskimmer.sh",
         str("in="+ str(output_dir + filename + '_merged.fq.gz')),
         "out=stdout.sam",
-        "ref=ampliseq_targets_only.fasta", # ampliseq AMR panel targets - argument for generalisation
+        "ref=ampliseq_targets_only.fasta", 
         "ambig=all",
         "minscaf=73",
         "saa=f",
@@ -179,6 +175,7 @@ def map_reads(args, filename, log_dir, output_dir):
     o.write(p_bbmap.stdout)  
     o.close() 
 
+
 # Output coverage using pileup.sh
 def pileup_reads(filename, log_dir, output_dir, cov_dir):
     pileup_command= [
@@ -196,6 +193,7 @@ def pileup_reads(filename, log_dir, output_dir, cov_dir):
     o = open(str(cov_dir + filename + '_coverage.txt'), 'w')  # create output stdout file 
     o.write(p_pileup.stdout)  
     o.close()  
+
 
 def main_function():
     start = time.time()
@@ -221,6 +219,7 @@ def main_function():
     end = time.time()
     print(str("All done in " + str((round(end - start, 2))) + " seconds"))
     
+
 main_function()
 
 
