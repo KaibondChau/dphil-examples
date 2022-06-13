@@ -38,3 +38,9 @@ samtools bam2fq $bam > $filename".fq"
 /home/ndm.local/kevinchau/vsearch/vsearch-2.21.1-linux-x86_64-static/bin/vsearch --fastx_subsample $filename".fq" --fastqout $filename"_10000000.fq" --sample_size 20000000
 /home/ndm.local/kevinchau/vsearch/vsearch-2.21.1-linux-x86_64-static/bin/vsearch --fastx_subsample $filename".fq" --fastqout $filename"_20000000.fq" --sample_size 40000000
 /home/ndm.local/kevinchau/vsearch/vsearch-2.21.1-linux-x86_64-static/bin/vsearch --fastx_subsample $filename".fq" --fastqout $filename"_40000000.fq" --sample_size 80000000
+
+mkdir raw
+mkdir input
+mv $filename".fq" $bam raw
+
+for f in *.fq; do bash ~/vscode/kc_repos/dphil-misc/reformat_kc.sh -i $f; done
